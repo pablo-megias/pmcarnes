@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM - Facilidades Gastronómicas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Estilo para el logo PM con efecto desfasado en Arial Black */
+        .logo-arial-black {
+            font-family: "Arial Black", Gadget, sans-serif;
+            font-weight: 900;
+            font-style: italic;
+            position: relative;
+            display: inline-block;
+            font-size: 14px;
+        }
+        
+        .logo-offset {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            color: #dc2626; /* rojo intenso */
+            opacity: 0.7;
+            z-index: 0;
+        }
+        
+        .logo-main {
+            position: relative;
+            color: black;
+            z-index: 10;
+        }
+
+        .animate-slide-left {
+            animation: slideLeft 0.3s ease-out;
+        }
+
+        @keyframes slideLeft {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        /* Ocultar barra de scroll estética */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 selection:bg-red-100">
+
+    <div id="app">
+        <!-- Navegación Superior -->
+        <nav class="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="font-black text-xl tracking-tighter italic mr-2">PM</span>
+                    <span class="text-[8px] font-black tracking-[0.3em] uppercase text-gray-400 hidden sm:block">Facilidades Gastronómicas</span>
+                </div>
+
+                <div class="flex-1 max-w-xs mx-4">
+                    <div class="relative flex items-center bg-gray-50 rounded-full px-4 py-1.5 border border-gray-100">
+                        <i class="fas fa-search text-gray-400 text-xs"></i>
+                        <input type="text" id="searchInput" placeholder="BUSCAR..." class="bg-transparent border-none focus:outline-none text-[10px] w-full ml-2 uppercase tracking-widest">
+                    </div>
+                </div>
+                
+                <!-- Botón de Carrito -->
+                <button onclick="toggleCart(true)" class="relative p-2 text-gray-900">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                    <span id="cartBadge" class="hidden absolute top-0 right-0 bg-red-600 text-white text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full">0</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="max-w-5xl mx-auto px-4 pt-12 pb-12">
+            <!-- Título Principal -->
+            <div class="text-center mb-16">
+                <h1 class="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none mb-4">
+                    NUESTRAS <span class="text-red-600">CARNES</span>
+                </h1>
+                <div class="h-0.5 w-12 bg-red-600 mx-auto"></div>
+            </div>
+
+            <!-- Contenedor donde se cargan los productos automáticamente -->
+            <div id="productsGrid">
+                <!-- Inyectado por Javascript -->
+            </div>
+        </main>
+
+        <!-- Banner de Servicio (Antes del pie de página) -->
+        <section class="w-full bg-stone-900 py-16 px-4">
+            <div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-6">
+                <i class="fas fa-truck text-red-600 text-4xl"></i>
+                <h2 class="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter italic leading-tight max-w-2xl">
+                    Enviás un WhatsApp y recibís tu pedido en tu local, <span class="text-red-600">un servicio pensado para vos</span>
+                </h2>
+                <div class="h-1 w-12 bg-red-600"></div>
+            </div>
+        </section>
+
+        <!-- Pie de Página -->
+        <footer class="bg-white border-t border-zinc-100 py-16 px-4">
+            <div class="max-w-4xl mx-auto flex flex-col items-center text-center">
+                <span class="font-black text-4xl tracking-tighter italic text-red-600">PM</span>
+                <span class="text-[8px] font-black tracking-[0.5em] uppercase text-gray-400 mt-2">Facilidades Gastronómicas</span>
+                <div class="flex gap-10 my-8">
+                    <a href="https://wa.me/5493815984807" target="_blank" class="text-zinc-400 hover:text-red-600 transition-colors text-xl"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://instagram.com/pmfacilidadesgastronomicas" target="_blank" class="text-zinc-400 hover:text-red-600 transition-colors text-xl"><i class="fab fa-instagram"></i></a>
+                </div>
+                <p class="text-[7px] font-black tracking-[0.4em] text-zinc-300 uppercase">San Miguel de Tucumán • Argentina</p>
+            </div>
+        </footer>
+
+        <!-- Carrito Lateral (Drawer) -->
+        <div id="cartSidebar" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" onclick="toggleCart(false)"></div>
+            <div class="absolute right-0 top-0 w-full max-w-sm bg-white h-full shadow-2xl flex flex-col animate-slide-left">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="text-xl font-black uppercase tracking-tighter italic">Tu Pedido</h2>
+                    <button onclick="toggleCart(false)" class="p-2 hover:bg-gray-100 rounded-full"><i class="fas fa-times"></i></button>
+                </div>
+                <!-- Lista de productos en el carrito -->
+                <div id="cartItems" class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+                    <!-- Dinámico -->
+                </div>
+                <!-- Resumen y Botón de Pedido -->
+                <div id="cartFooter" class="p-6 bg-gray-50 space-y-4 hidden">
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Total Est.</span>
+                        <span id="cartTotal" class="text-3xl font-black tracking-tighter">$0</span>
+                    </div>
+                    <button onclick="sendToWhatsApp()" class="w-full bg-red-600 hover:bg-black text-white py-5 text-[11px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2 transition-all shadow-xl shadow-red-100">
+                        <i class="fab fa-whatsapp text-lg"></i> Confirmar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Listado de Precios y Productos
+        const products = [
+            { id: 301, category: 'Combos', name: 'Combo Asado', price: 71999, unit: 'un', description: 'Incluye: 1 kg Costillas, 1 kg Tira de Lomo, 1 kg Roast Beef, 1 kg Chorizos.' },
+            { id: 302, category: 'Combos', name: 'Combo Semanal', price: 74999, unit: 'un', description: 'Incluye: 1 kg Milanesas, 1 kg Costeletas, 1 kg Bifes, 1 kg Salsa, 1 kg Molida.' },
+            { id: 303, category: 'Combos', name: 'Asado Premium', price: 84999, unit: 'un', description: 'Incluye: 1 kg Picana, 1 kg Colita Cuadril, 1 kg Entraña, 1 kg Chorizos de Cerdo.' },
+            { id: 101, category: 'Novillito', name: 'Nalga', price: 20900, unit: 'kg' },
+            { id: 102, category: 'Novillito', name: 'Lomo Filet', price: 20900, unit: 'kg' },
+            { id: 103, category: 'Novillito', name: 'Matambre / Vacío', price: 18400, unit: 'kg' },
+            { id: 104, category: 'Novillito', name: 'Costilla P. Queperi', price: 17000, unit: 'kg' },
+            { id: 105, category: 'Novillito', name: 'Picana / Entraña', price: 20900, unit: 'kg' },
+            { id: 106, category: 'Novillito', name: 'Trasjamón / Choquiz', price: 18500, unit: 'kg' },
+            { id: 107, category: 'Novillito', name: 'Costeleta Primo', price: 14500, unit: 'kg' },
+            { id: 108, category: 'Novillito', name: 'Molida Premium', price: 13000, unit: 'kg' },
+            { id: 201, category: 'Vaquita', name: 'Nalga', price: 16400, unit: 'kg' },
+            { id: 202, category: 'Vaquita', name: 'Lomo Filet', price: 16400, unit: 'kg' },
+            { id: 203, category: 'Vaquita', name: 'Matambre', price: 15000, unit: 'kg' },
+            { id: 204, category: 'Vaquita', name: 'Vacío / Tapa', price: 12900, unit: 'kg' },
+            { id: 205, category: 'Vaquita', name: 'Peceto', price: 16400, unit: 'kg' },
+            { id: 206, category: 'Vaquita', name: 'Trasjamón', price: 14500, unit: 'kg' },
+            { id: 207, category: 'Vaquita', name: 'Primo / Duro', price: 12500, unit: 'kg' },
+            { id: 208, category: 'Vaquita', name: 'Molida Especial', price: 11900, unit: 'kg' }
+        ];
+
+        let cart = [];
+
+        // Función para mostrar los productos en pantalla
+        function renderProducts() {
+            const container = document.getElementById('productsGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            container.innerHTML = '';
+
+            const categories = ['Combos', 'Novillito', 'Vaquita'];
+            
+            categories.forEach(cat => {
+                const filtered = products.filter(p => p.category === cat && p.name.toLowerCase().includes(search));
+                if (filtered.length === 0) return;
+
+                const section = document.createElement('section');
+                section.className = "mb-20";
+                
+                const title = document.createElement('h2');
+                title.className = cat === 'Combos' 
+                    ? "text-[12px] font-black uppercase tracking-[0.6em] text-gray-400 mb-8 border-l-2 border-stone-900 pl-4"
+                    : "text-[16px] font-black uppercase tracking-[0.6em] text-red-600 mb-8 flex items-center gap-4";
+                
+                if (cat !== 'Combos') title.innerHTML = `<span class="w-12 h-[3px] bg-red-600"></span> ${cat}`;
+                else title.innerText = `Destacados: ${cat}`;
+                
+                section.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = cat === 'Combos' ? "grid grid-cols-1 md:grid-cols-3 gap-6" : "grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1";
+
+                filtered.forEach(p => {
+                    const cartItem = cart.find(i => i.id === p.id);
+                    const itemDiv = document.createElement('div');
+                    
+                    if (cat === 'Combos') {
+                        itemDiv.className = "group border border-gray-100 p-4 bg-white hover:border-red-600 transition-all";
+                        itemDiv.innerHTML = `
+                            <div class="aspect-[16/9] mb-4 bg-stone-900 flex items-center justify-center text-white italic font-black text-2xl">PM</div>
+                            <h3 class="text-sm font-black uppercase tracking-tight mb-1">${p.name}</h3>
+                            <p class="text-[9px] text-gray-400 italic mb-4 line-clamp-2">${p.description}</p>
+                            <div class="flex items-center justify-between">
+                                <span class="font-black text-lg tracking-tighter">$${p.price.toLocaleString('es-AR')}</span>
+                                <button onclick="addToCart(${p.id})" class="bg-black text-white p-2 hover:bg-red-600 transition-colors">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        itemDiv.className = "group flex items-center justify-between py-6 border-b border-gray-50 hover:bg-gray-50/50 px-3 transition-colors";
+                        itemDiv.innerHTML = `
+                            <div class="flex items-center flex-1">
+                                <div class="logo-arial-black mr-5">
+                                    <span class="logo-offset">PM</span>
+                                    <span class="logo-main">PM</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[14px] font-black uppercase tracking-tight">${p.name}</span>
+                                    <span class="text-[12px] font-bold text-gray-400">$${p.price.toLocaleString('es-AR')} <span class="text-[9px] opacity-60">/ ${p.unit}</span></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                ${cartItem ? `
+                                    <div class="flex items-center gap-3 bg-red-600 text-white rounded-full px-4 py-2 shadow-lg shadow-red-100">
+                                        <button onclick="updateQty(${p.id}, -1)" class="hover:scale-110 transition-transform"><i class="fas fa-minus text-xs"></i></button>
+                                        <span class="text-[12px] font-bold min-w-[14px] text-center">${cartItem.qty}</span>
+                                        <button onclick="updateQty(${p.id}, 1)" class="hover:scale-110 transition-transform"><i class="fas fa-plus text-xs"></i></button>
+                                    </div>
+                                ` : `
+                                    <button onclick="addToCart(${p.id})" class="w-11 h-11 flex items-center justify-center rounded-full border-2 border-gray-100 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm active:scale-95">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                `}
+                            </div>
+                        `;
+                    }
+                    grid.appendChild(itemDiv);
+                });
+
+                section.appendChild(grid);
+                container.appendChild(section);
+            });
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const exists = cart.find(i => i.id === id);
+            if (exists) exists.qty++;
+            else cart.push({...product, qty: 1});
+            updateCartUI();
+            renderProducts();
+            toggleCart(true);
+        }
+
+        function updateQty(id, delta) {
+            const index = cart.findIndex(i => i.id === id);
+            if (index === -1) return;
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) cart.splice(index, 1);
+            updateCartUI();
+            renderProducts();
+        }
+
+        // Actualizar el diseño del carrito
+        function updateCartUI() {
+            const list = document.getElementById('cartItems');
+            const footer = document.getElementById('cartFooter');
+            const badge = document.getElementById('cartBadge');
+            const totalEl = document.getElementById('cartTotal');
+            
+            list.innerHTML = '';
+            let total = 0;
+            let totalQty = 0;
+
+            if (cart.length === 0) {
+                list.innerHTML = `<div class="h-full flex flex-col items-center justify-center opacity-20"><p class="text-[8px] uppercase tracking-[0.5em] font-black mt-20">Carrito Vacío</p></div>`;
+                footer.classList.add('hidden');
+                badge.classList.add('hidden');
+            } else {
+                cart.forEach(item => {
+                    total += item.price * item.qty;
+                    totalQty += item.qty;
+                    const div = document.createElement('div');
+                    div.className = "flex gap-4 items-center border-b border-gray-50 pb-4";
+                    div.innerHTML = `
+                        <div class="flex-1">
+                            <h4 class="text-[11px] font-black uppercase leading-tight">${item.name}</h4>
+                            <p class="text-[10px] font-bold text-gray-400 mt-0.5">$${(item.price * item.qty).toLocaleString('es-AR')}</p>
+                        </div>
+                        <div class="flex items-center gap-3 border border-gray-100 p-1 rounded-sm">
+                            <button onclick="updateQty(${item.id}, -1)" class="hover:text-red-600 p-1"><i class="fas fa-minus text-[10px]"></i></button>
+                            <span class="text-[11px] font-black min-w-[14px] text-center">${item.qty}</span>
+                            <button onclick="updateQty(${item.id}, 1)" class="hover:text-red-600 p-1"><i class="fas fa-plus text-[10px]"></i></button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+                footer.classList.remove('hidden');
+                badge.classList.remove('hidden');
+                badge.innerText = totalQty;
+                totalEl.innerText = `$${total.toLocaleString('es-AR')}`;
+            }
+        }
+
+        function toggleCart(show) {
+            document.getElementById('cartSidebar').classList.toggle('hidden', !show);
+        }
+
+        // Envío del pedido vía WhatsApp
+        function sendToWhatsApp() {
+            const WHATSAPP_NUMBER = "5493815984807";
+            let message = "*PM FACILIDADES GASTRONÓMICAS - NUEVO PEDIDO*\n";
+            message += "------------------------------------------\n";
+            let total = 0;
+            cart.forEach(item => {
+                const sub = item.price * item.qty;
+                total += sub;
+                message += `▪️ *${item.qty} ${item.unit}* ${item.name} (${item.category})\n`;
+                message += `   Subtotal: $${sub.toLocaleString('es-AR')}\n`;
+            });
+            message += "------------------------------------------\n";
+            message += `*TOTAL ESTIMADO: $${total.toLocaleString('es-AR')}*\n\n`;
+            message += "Solicito presupuesto final y fecha de entrega.";
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        // Listener para la barra de búsqueda
+        document.getElementById('searchInput').addEventListener('input', renderProducts);
+        
+        // Carga inicial al abrir la página
+        renderProducts();
+    </script>
+</body>
+</html>
